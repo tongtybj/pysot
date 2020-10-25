@@ -101,7 +101,8 @@ def main():
                     pred_bboxes.append(0)
                 toc += cv2.getTickCount() - tic
                 if idx == 0:
-                    cv2.destroyAllWindows()
+                    if args.vis:
+                        cv2.destroyAllWindows()
                 if args.vis and idx > frame_counter:
                     cv2.polylines(img, [np.array(gt_bbox, np.int).reshape((-1, 1, 2))],
                             True, (0, 255, 0), 3)
@@ -164,7 +165,8 @@ def main():
                 toc += cv2.getTickCount() - tic
                 track_times.append((cv2.getTickCount() - tic)/cv2.getTickFrequency())
                 if idx == 0:
-                    cv2.destroyAllWindows()
+                    if args.vis:
+                        cv2.destroyAllWindows()
                 if args.vis and idx > 0:
                     gt_bbox = list(map(int, gt_bbox))
                     pred_bbox = list(map(int, pred_bbox))
