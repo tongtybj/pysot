@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import argparse
 import os
 
+import sys
 import cv2
 import torch
 import numpy as np
@@ -71,6 +72,9 @@ def main():
             toc = 0
             pred_bboxes = []
             for idx, (img, gt_bbox) in enumerate(video):
+                cx, cy, w, h = get_axis_aligned_bbox(np.array(gt_bbox))
+                gt_bbox_ = [cx-(w-1)/2, cy-(h-1)/2, w, h]
+
                 if len(gt_bbox) == 4:
                     gt_bbox = [gt_bbox[0], gt_bbox[1],
                        gt_bbox[0], gt_bbox[1]+gt_bbox[3]-1,
@@ -78,8 +82,6 @@ def main():
                        gt_bbox[0]+gt_bbox[2]-1, gt_bbox[1]]
                 tic = cv2.getTickCount()
                 if idx == frame_counter:
-                    cx, cy, w, h = get_axis_aligned_bbox(np.array(gt_bbox))
-                    gt_bbox_ = [cx-(w-1)/2, cy-(h-1)/2, w, h]
                     tracker.init(img, gt_bbox_)
                     pred_bbox = gt_bbox_
                     pred_bboxes.append(1)
@@ -111,8 +113,12 @@ def main():
                                 True, (0, 255, 255), 3)
                     else:
                         bbox = list(map(int, pred_bbox))
+                        gt_bbox = list(map(int, gt_bbox_))
+                        cv2.rectangle(img, (gt_bbox[0], gt_bbox[1]),
+                                      (gt_bbox[0]+gt_bbox[2], gt_bbox[1]+gt_bbox[3]), (255, 0, 0), 3)
                         cv2.rectangle(img, (bbox[0], bbox[1]),
                                       (bbox[0]+bbox[2], bbox[1]+bbox[3]), (0, 255, 255), 3)
+
                     cv2.putText(img, str(idx), (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     cv2.putText(img, str(lost_number), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                     cv2.imshow(video.name, img)
@@ -177,6 +183,9 @@ def main():
                     cv2.putText(img, str(idx), (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     cv2.imshow(video.name, img)
                     cv2.waitKey(1)
+                else:
+                    sys.stderr.write("inference on {}:  {} / {}\r".format(video.name, idx+1, len(video)))
+
             toc /= cv2.getTickFrequency()
             # save results
             if 'VOT2018-LT' == args.dataset:
