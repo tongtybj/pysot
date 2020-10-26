@@ -5,7 +5,7 @@
 docker run --name pysot \
        --gpus all \
        --mount type=bind,src=${2:-~/pysot},dst=/root/pysot \
-       --mount type=bind,src=${1:-~}/otb,dst=/root/pysot/testing_dataset/OTB100 \
+       --mount type=bind,src=${1:-~}/datasets,dst=/root/datasets \
        --shm-size=4g \
        -it --privileged \
        -p 6006:6006 \

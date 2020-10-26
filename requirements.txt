@@ -5,4 +5,5 @@ pyyaml
 matplotlib==2.2.5
 colorama
 cython
+gdown
 tensorboardX

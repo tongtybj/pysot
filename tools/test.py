@@ -123,6 +123,9 @@ def main():
                     cv2.putText(img, str(lost_number), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                     cv2.imshow(video.name, img)
                     cv2.waitKey(1)
+                else:
+                    sys.stderr.write("inference on {}:  {} / {}\r".format(video.name, idx+1, len(video)))
+
             toc /= cv2.getTickFrequency()
             # save results
             video_path = os.path.join('results', args.dataset, model_name,
