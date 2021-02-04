@@ -10,6 +10,8 @@ import cv2
 import torch
 import numpy as np
 from glob import glob
+import json
+
 
 from pysot.core.config import cfg
 from pysot.models.model_builder import ModelBuilder
@@ -22,6 +24,7 @@ parser.add_argument('--config', type=str, help='config file')
 parser.add_argument('--snapshot', type=str, help='model name')
 parser.add_argument('--video_name', default='', type=str,
                     help='videos or image files')
+parser.add_argument('--save_result', action='store_true')
 args = parser.parse_args()
 
 
@@ -77,7 +80,10 @@ def main():
         video_name = args.video_name.split('/')[-1].split('.')[0]
     else:
         video_name = 'webcam'
-    cv2.namedWindow(video_name, cv2.WND_PROP_FULLSCREEN)
+    cv2.namedWindow(video_name)
+
+
+    result = []
     for frame in get_frames(args.video_name):
         if first_frame:
             try:
@@ -86,6 +92,7 @@ def main():
                 exit()
             tracker.init(frame, init_rect)
             first_frame = False
+            result.append(init_rect)
         else:
             outputs = tracker.track(frame)
             if 'polygon' in outputs:
@@ -104,6 +111,12 @@ def main():
             cv2.imshow(video_name, frame)
             cv2.waitKey(40)
 
+            result.append(bbox)
+
+    if args.save_result:
+        filename= args.video_name.split('/')[-1] + "_" + args.snapshot.split('/')[-1].split('.')[0] + ".json"
+        with open(filename,  mode='w') as f:
+            json.dump(result, f)
 
 if __name__ == '__main__':
     main()
